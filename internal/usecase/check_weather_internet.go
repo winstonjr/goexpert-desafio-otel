@@ -7,24 +7,18 @@ import (
 	"strconv"
 )
 
-type TemperatureDTO struct {
-	TempCelsius    float64 `json:"temp_C"`
-	TempFahrenheit float64 `json:"temp_F"`
-	TempKelvin     float64 `json:"temp_K"`
-}
-
 type CheckWeatherUseCase struct {
-	WeatherapiIntegration entity.WeatherapiIntegrationInterface
-	ViacepIntegration     entity.ViacepIntegrationInterface
+	WeatherApiIntegration entity.WeatherapiIntegrationInterface
+	ViaCepIntegration     entity.ViacepIntegrationInterface
 }
 
 func NewCheckWeatherUseCase(
-	weatherapiIntegration entity.WeatherapiIntegrationInterface,
-	viacepIntegration entity.ViacepIntegrationInterface) *CheckWeatherUseCase {
+	weatherApiIntegration entity.WeatherapiIntegrationInterface,
+	viaCepIntegration entity.ViacepIntegrationInterface) *CheckWeatherUseCase {
 
 	return &CheckWeatherUseCase{
-		WeatherapiIntegration: weatherapiIntegration,
-		ViacepIntegration:     viacepIntegration,
+		WeatherApiIntegration: weatherApiIntegration,
+		ViaCepIntegration:     viaCepIntegration,
 	}
 }
 
@@ -39,26 +33,27 @@ func cepIsValid(cep string) bool {
 	return true
 }
 
-func (c *CheckWeatherUseCase) Execute(cep string) (*TemperatureDTO, error) {
+func (c *CheckWeatherUseCase) Execute(cep string) (*entity.TemperatureDTO, error) {
 	if !cepIsValid(cep) {
-		return &TemperatureDTO{}, errors.New("invalid zipcode")
+		return nil, errors.New("invalid zipcode")
 	}
-	chViacep := make(chan types.Either[string])
-	go c.ViacepIntegration.GetCity(cep, chViacep)
-	reschViacep := <-chViacep
-	if reschViacep.Left != nil {
-		return &TemperatureDTO{}, reschViacep.Left
+	chViaCep := make(chan types.Either[string])
+	go c.ViaCepIntegration.GetCity(cep, chViaCep)
+	resChViaCep := <-chViaCep
+	if resChViaCep.Left != nil {
+		return nil, resChViaCep.Left
 	}
 	chWeatherApi := make(chan types.Either[float64])
-	go c.WeatherapiIntegration.GetCelsiusTemperatureByCity(reschViacep.Right, chWeatherApi)
+	go c.WeatherApiIntegration.GetCelsiusTemperatureByCity(resChViaCep.Right, chWeatherApi)
 	reschWeatherApi := <-chWeatherApi
 	if reschWeatherApi.Left != nil {
-		return &TemperatureDTO{}, reschWeatherApi.Left
+		return nil, reschWeatherApi.Left
 	}
 
 	ent := entity.NewWeather(reschWeatherApi.Right)
 
-	dto := TemperatureDTO{
+	dto := entity.TemperatureDTO{
+		City:           resChViaCep.Right,
 		TempCelsius:    ent.TemperatureCelsius,
 		TempFahrenheit: ent.TemperatureFahrenheit,
 		TempKelvin:     ent.TemperatureKelvin,

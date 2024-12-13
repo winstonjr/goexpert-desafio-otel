@@ -1,0 +1,34 @@
+POST http://localhost:8081/
+Host: localhost:8081
+Content-Type: application/json
+
+{
+"cep":"01311100"
+}
+###
+
+GET http://localhost:8081/
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "cep":"1311100"
+}
+###
+
+GET http://localhost:8081/
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "cep": "00000000"
+}
+###
+
+GET http://localhost:8081/?cep=99990999
+Host: localhost:8081
+Content-Type: application/json
+
+{
+  "cep": "00000000"
+}
