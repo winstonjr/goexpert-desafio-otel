@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/infra/types"
 	"io"
 	"net/http"
@@ -14,19 +15,6 @@ type ViacepIntegration struct{}
 
 func NewViacepIntegration() *ViacepIntegration {
 	return &ViacepIntegration{}
-}
-
-type viacepDTO struct {
-	Cep         string `json:"cep"`
-	Logradouro  string `json:"logradouro"`
-	Complemento string `json:"complemento"`
-	Bairro      string `json:"bairro"`
-	Localidade  string `json:"localidade"`
-	Uf          string `json:"uf"`
-	Ibge        string `json:"ibge"`
-	Gia         string `json:"gia"`
-	Ddd         string `json:"ddd"`
-	Siafi       string `json:"siafi"`
 }
 
 func (o *ViacepIntegration) GetCity(cep string, resultch chan<- types.Either[string]) {
@@ -47,7 +35,7 @@ func (o *ViacepIntegration) GetCity(cep string, resultch chan<- types.Either[str
 		resultch <- types.Either[string]{Left: errors.New("can not find zipcode")}
 		return
 	}
-	var data viacepDTO
+	var data dto.ViacepDTO
 	err = json.Unmarshal(res, &data)
 	if err != nil {
 		resultch <- types.Either[string]{Left: err}

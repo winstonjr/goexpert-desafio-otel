@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 	viaCepIntegration := integration.NewViacepIntegration()
-	weatherApiIntegration := integration.NewWeatherapiIntegration(config.WeatherApiKey)
+	weatherApiIntegration := integration.NewWeatherApiIntegration(config.WeatherApiKey)
 	checkWeatherUseCase := usecase.NewCheckWeatherUseCase(weatherApiIntegration, viaCepIntegration)
 
 	weatherPostHandler := web.NewWeatherPostHandler(checkWeatherUseCase)

@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/entity"
 	"log"
 	"net/http"
@@ -11,10 +12,6 @@ type WeatherPostHandler struct {
 	checkWeatherUseCase entity.CheckWeatherUseCaseInterface
 }
 
-type WeatherPostDTO struct {
-	CEP string
-}
-
 func NewWeatherPostHandler(checkWeatherUseCase entity.CheckWeatherUseCaseInterface) *WeatherPostHandler {
 	return &WeatherPostHandler{
 		checkWeatherUseCase: checkWeatherUseCase,
@@ -22,15 +19,15 @@ func NewWeatherPostHandler(checkWeatherUseCase entity.CheckWeatherUseCaseInterfa
 }
 
 func (wph *WeatherPostHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var dto WeatherPostDTO
-	err := json.NewDecoder(r.Body).Decode(&dto)
-	if err != nil || dto.CEP == "" {
+	var wp dto.WeatherPostDTO
+	err := json.NewDecoder(r.Body).Decode(&wp)
+	if err != nil || wp.CEP == "" {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_, _ = w.Write([]byte(`invalid zipcode`))
 		return
 	}
-	log.Println("cep acquired", dto.CEP)
-	temperature, err := wph.checkWeatherUseCase.Execute(dto.CEP)
+	log.Println("cep acquired", wp.CEP)
+	temperature, err := wph.checkWeatherUseCase.Execute(wp.CEP)
 	if err != nil {
 		log.Println("temperature error", err.Error())
 		if err.Error() == "invalid zipcode" {
