@@ -4,13 +4,18 @@ import (
 	"encoding/json"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/entity"
-	"io"
 	"log"
 	"net/http"
 )
 
 type WeatherPostInternalHandler struct {
 	checkWeatherLocalUseCase entity.CheckWeatherLocalUseCaseInterface
+}
+
+func NewWeatherPostInternalHandler(checkWeatherLocalUseCase entity.CheckWeatherLocalUseCaseInterface) *WeatherPostInternalHandler {
+	return &WeatherPostInternalHandler{
+		checkWeatherLocalUseCase: checkWeatherLocalUseCase,
+	}
 }
 
 func (wph *WeatherPostInternalHandler) Handle(w http.ResponseWriter, r *http.Request) {
@@ -22,14 +27,14 @@ func (wph *WeatherPostInternalHandler) Handle(w http.ResponseWriter, r *http.Req
 		return
 	}
 	log.Println("cep acquired", wp.CEP)
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		_, _ = w.Write([]byte(`invalid zipcode`))
-		return
-	}
-	log.Println("cep acquired", string(body))
-	temperature, err := wph.checkWeatherLocalUseCase.ExecuteLocal(string(body))
+	//body, err := io.ReadAll(r.Body)
+	//if err != nil {
+	//	w.WriteHeader(http.StatusUnprocessableEntity)
+	//	_, _ = w.Write([]byte(`invalid zipcode`))
+	//	return
+	//}
+	//log.Println("cep acquired", string(body))
+	temperature, err := wph.checkWeatherLocalUseCase.ExecuteLocal(&wp)
 	if err != nil {
 		log.Println("temperature error", err.Error())
 		if err.Error() == "invalid zipcode" {

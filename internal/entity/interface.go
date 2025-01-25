@@ -14,7 +14,7 @@ type WeatherapiIntegrationInterface interface {
 }
 
 type WeatherApiLocalIntegrationInterface interface {
-	GetCep(cep string, resultCh chan<- types.Either[float64])
+	GetCep(cep *dto.WeatherPostDTO, resultCh chan<- types.Either[dto.TemperatureDTO])
 }
 
 type CheckWeatherUseCaseInterface interface {
@@ -22,5 +22,5 @@ type CheckWeatherUseCaseInterface interface {
 }
 
 type CheckWeatherLocalUseCaseInterface interface {
-	ExecuteLocal(cep string) (*dto.TemperatureDTO, error)
+	ExecuteLocal(cep *dto.WeatherPostDTO) (*dto.TemperatureDTO, error)
 }

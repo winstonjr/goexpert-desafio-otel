@@ -11,10 +11,21 @@ import (
 
 type WeatherAPILocalIntegration struct{}
 
-func (w *WeatherAPILocalIntegration) GetCep(cep string, resultCh chan<- types.Either[dto.TemperatureDTO]) {
+func NewWeatherAPILocalIntegration() *WeatherAPILocalIntegration {
+	return &WeatherAPILocalIntegration{}
+}
+
+func (w *WeatherAPILocalIntegration) GetCep(cep *dto.WeatherPostDTO, resultCh chan<- types.Either[dto.TemperatureDTO]) {
 	client := getHttpClient()
 	weatherUrl := "http://localhost:8081/"
-	req, err := client.Post(weatherUrl, "application/json", bytes.NewBufferString(cep))
+
+	filter, err := json.Marshal(cep)
+	if err != nil {
+		resultCh <- types.Either[dto.TemperatureDTO]{Left: err}
+		return
+	}
+
+	req, err := client.Post(weatherUrl, "application/json", bytes.NewReader(filter))
 	if err != nil {
 		resultCh <- types.Either[dto.TemperatureDTO]{Left: err}
 		return

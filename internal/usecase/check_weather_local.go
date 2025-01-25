@@ -1,38 +1,33 @@
 package usecase
 
 import (
+	"errors"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/entity"
+	"github.com/winstonjr/goexpert-desafio-otel/internal/infra/types"
 )
 
 type CheckWeatherLocalUseCase struct {
-	LocalApiIntegration entity.CheckWeatherLocalUseCaseInterface
+	LocalApiIntegration entity.WeatherApiLocalIntegrationInterface
 }
 
-func (c *CheckWeatherLocalUseCase) ExecuteLocal(cep string) (*dto.TemperatureDTO, error) {
-	//	if !cepIsValid(cep) {
-	//		return nil, errors.New("invalid zipcode")
-	//	}
-	//	chViaCep := make(chan types.Either[dto.TemperatureDTO])
-	//	go c.LocalApiIntegration.GetCity(cep, chViaCep)
-	//	resChViaCep := <-chViaCep
-	//	if resChViaCep.Left != nil {
-	//		return nil, resChViaCep.Left
-	//	}
-	//	chWeatherApi := make(chan types.Either[float64])
-	//	go c.WeatherApiIntegration.GetCelsiusTemperatureByCity(resChViaCep.Right, chWeatherApi)
-	//	resChWeatherApi := <-chWeatherApi
-	//	if resChWeatherApi.Left != nil {
-	//		return nil, resChWeatherApi.Left
-	//	}
-	//
-	//	ent := entity.NewWeather(resChWeatherApi.Right)
+func NewCheckWeatherLocalUseCase(localIntegration entity.WeatherApiLocalIntegrationInterface) *CheckWeatherLocalUseCase {
+	return &CheckWeatherLocalUseCase{
+		LocalApiIntegration: localIntegration,
+	}
+}
 
-	return &dto.TemperatureDTO{
-		City:           "",
-		TempCelsius:    0,
-		TempFahrenheit: 0,
-		TempKelvin:     0,
-	}, nil
+func (c *CheckWeatherLocalUseCase) ExecuteLocal(cep *dto.WeatherPostDTO) (*dto.TemperatureDTO, error) {
+	if !cepIsValid(cep.CEP) {
+		return nil, errors.New("invalid zipcode")
+	}
+	chLocal := make(chan types.Either[dto.TemperatureDTO])
+	go c.LocalApiIntegration.GetCep(cep, chLocal)
+	resChLocal := <-chLocal
+	if resChLocal.Left != nil {
+		return nil, resChLocal.Left
+	}
+
+	return &resChLocal.Right, nil
 
 }

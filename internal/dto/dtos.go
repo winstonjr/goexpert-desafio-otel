@@ -75,5 +75,5 @@ type WeatherDTO struct {
 }
 
 type WeatherPostDTO struct {
-	CEP string
+	CEP string `json:"cep"`
 }
