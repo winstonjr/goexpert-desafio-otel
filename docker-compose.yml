@@ -1,0 +1,26 @@
+services:
+  api1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: servico-a
+    ports:
+      - "8080:8080"
+    networks:
+      - otelNetwork
+
+  api2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: servico-b
+    ports:
+      - "8081:8081"
+    networks:
+      - otelNetwork
+
+networks:
+  otelNetwork:
+    driver: bridge

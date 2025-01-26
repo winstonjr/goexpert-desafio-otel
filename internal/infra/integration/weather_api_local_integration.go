@@ -9,15 +9,19 @@ import (
 	"log"
 )
 
-type WeatherAPILocalIntegration struct{}
+type WeatherAPILocalIntegration struct {
+	uri string
+}
 
-func NewWeatherAPILocalIntegration() *WeatherAPILocalIntegration {
-	return &WeatherAPILocalIntegration{}
+func NewWeatherAPILocalIntegration(uri string) *WeatherAPILocalIntegration {
+	return &WeatherAPILocalIntegration{
+		uri: uri,
+	}
 }
 
 func (w *WeatherAPILocalIntegration) GetCep(cep *dto.WeatherPostDTO, resultCh chan<- types.Either[dto.TemperatureDTO]) {
 	client := getHttpClient()
-	weatherUrl := "http://localhost:8081/"
+	weatherUrl := w.uri
 
 	filter, err := json.Marshal(cep)
 	if err != nil {
