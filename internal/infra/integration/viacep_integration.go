@@ -1,11 +1,14 @@
 package integration
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/infra/types"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"io"
 	"net/http"
 	"strings"
@@ -17,15 +20,23 @@ func NewViacepIntegration() *ViacepIntegration {
 	return &ViacepIntegration{}
 }
 
-func (o *ViacepIntegration) GetCity(cep string, resultch chan<- types.Either[string]) {
+func (o *ViacepIntegration) GetCity(ctx context.Context, cep string, resultch chan<- types.Either[string]) {
 	client := getHttpClient()
-	req, err := client.Get("https://viacep.com.br/ws/" + cep + "/json/")
+	cepURL := "https://viacep.com.br/ws/" + cep + "/json/"
+	//resp, err := client.Get("https://viacep.com.br/ws/" + cep + "/json/")
+	req, err := http.NewRequestWithContext(ctx, "GET", cepURL, nil)
 	if err != nil {
 		resultch <- types.Either[string]{Left: err}
 		return
 	}
-	defer req.Body.Close()
-	res, err := io.ReadAll(req.Body)
+	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(req.Header))
+	resp, err := client.Do(req)
+	if err != nil {
+		resultch <- types.Either[string]{Left: err}
+		return
+	}
+	defer resp.Body.Close()
+	res, err := io.ReadAll(resp.Body)
 	if err != nil {
 		resultch <- types.Either[string]{Left: err}
 		return

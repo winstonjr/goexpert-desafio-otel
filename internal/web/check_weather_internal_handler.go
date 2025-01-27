@@ -4,16 +4,21 @@ import (
 	"encoding/json"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/entity"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 	"log"
 	"net/http"
 )
 
 type WeatherPostHandler struct {
 	checkWeatherUseCase entity.CheckWeatherUseCaseInterface
+	OTELTracer          trace.Tracer
 }
 
-func NewWeatherPostHandler(checkWeatherUseCase entity.CheckWeatherUseCaseInterface) *WeatherPostHandler {
+func NewWeatherPostHandler(checkWeatherUseCase entity.CheckWeatherUseCaseInterface, tracer trace.Tracer) *WeatherPostHandler {
 	return &WeatherPostHandler{
+		OTELTracer:          tracer,
 		checkWeatherUseCase: checkWeatherUseCase,
 	}
 }
@@ -27,7 +32,16 @@ func (wph *WeatherPostHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("cep acquired", wp.CEP)
-	temperature, err := wph.checkWeatherUseCase.Execute(wp.CEP)
+
+	carrier := propagation.HeaderCarrier(r.Header)
+	ctx := r.Context()
+	ctx = otel.GetTextMapPropagator().Extract(ctx, carrier)
+	ctx, spanInicial := wph.OTELTracer.Start(ctx, "SPAN INICIAL: external-cep-api")
+	spanInicial.End()
+	ctx, span := wph.OTELTracer.Start(ctx, "CHAMADA EXTERNA: external-cep-api")
+	defer span.End()
+
+	temperature, err := wph.checkWeatherUseCase.Execute(ctx, wp.CEP)
 	if err != nil {
 		log.Println("temperature error", err.Error())
 		if err.Error() == "invalid zipcode" {

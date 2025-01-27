@@ -7,11 +7,11 @@ import (
 )
 
 type ViacepIntegrationInterface interface {
-	GetCity(cep string, resultch chan<- types.Either[string])
+	GetCity(ctx context.Context, cep string, resultch chan<- types.Either[string])
 }
 
 type WeatherapiIntegrationInterface interface {
-	GetCelsiusTemperatureByCity(city string, resultch chan<- types.Either[float64])
+	GetCelsiusTemperatureByCity(ctx context.Context, city string, resultch chan<- types.Either[float64])
 }
 
 type WeatherApiLocalIntegrationInterface interface {
@@ -19,7 +19,7 @@ type WeatherApiLocalIntegrationInterface interface {
 }
 
 type CheckWeatherUseCaseInterface interface {
-	Execute(cep string) (*dto.TemperatureDTO, error)
+	Execute(ctx context.Context, cep string) (*dto.TemperatureDTO, error)
 }
 
 type CheckWeatherLocalUseCaseInterface interface {

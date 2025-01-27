@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/entity"
@@ -34,18 +35,18 @@ func cepIsValid(cep string) bool {
 	return true
 }
 
-func (c *CheckWeatherUseCase) Execute(cep string) (*dto.TemperatureDTO, error) {
+func (c *CheckWeatherUseCase) Execute(ctx context.Context, cep string) (*dto.TemperatureDTO, error) {
 	if !cepIsValid(cep) {
 		return nil, errors.New("invalid zipcode")
 	}
 	chViaCep := make(chan types.Either[string])
-	go c.ViaCepIntegration.GetCity(cep, chViaCep)
+	go c.ViaCepIntegration.GetCity(ctx, cep, chViaCep)
 	resChViaCep := <-chViaCep
 	if resChViaCep.Left != nil {
 		return nil, resChViaCep.Left
 	}
 	chWeatherApi := make(chan types.Either[float64])
-	go c.WeatherApiIntegration.GetCelsiusTemperatureByCity(resChViaCep.Right, chWeatherApi)
+	go c.WeatherApiIntegration.GetCelsiusTemperatureByCity(ctx, resChViaCep.Right, chWeatherApi)
 	resChWeatherApi := <-chWeatherApi
 	if resChWeatherApi.Left != nil {
 		return nil, resChWeatherApi.Left
