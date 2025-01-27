@@ -1,20 +1,27 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/entity"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 	"log"
 	"net/http"
 )
 
 type WeatherPostInternalHandler struct {
+	context                  *context.Context
 	checkWeatherLocalUseCase entity.CheckWeatherLocalUseCaseInterface
+	OTELTracer               trace.Tracer
 }
 
-func NewWeatherPostInternalHandler(checkWeatherLocalUseCase entity.CheckWeatherLocalUseCaseInterface) *WeatherPostInternalHandler {
+func NewWeatherPostInternalHandler(checkWeatherLocalUseCase entity.CheckWeatherLocalUseCaseInterface, tracer trace.Tracer) *WeatherPostInternalHandler {
 	return &WeatherPostInternalHandler{
 		checkWeatherLocalUseCase: checkWeatherLocalUseCase,
+		OTELTracer:               tracer,
 	}
 }
 
@@ -27,14 +34,16 @@ func (wph *WeatherPostInternalHandler) Handle(w http.ResponseWriter, r *http.Req
 		return
 	}
 	log.Println("cep acquired", wp.CEP)
-	//body, err := io.ReadAll(r.Body)
-	//if err != nil {
-	//	w.WriteHeader(http.StatusUnprocessableEntity)
-	//	_, _ = w.Write([]byte(`invalid zipcode`))
-	//	return
-	//}
-	//log.Println("cep acquired", string(body))
-	temperature, err := wph.checkWeatherLocalUseCase.ExecuteLocal(&wp)
+
+	carrier := propagation.HeaderCarrier(r.Header)
+	ctx := r.Context()
+	ctx = otel.GetTextMapPropagator().Extract(ctx, carrier)
+	ctx, spanInicial := wph.OTELTracer.Start(ctx, "SPAN INICIAL: entrance-cep-api")
+	spanInicial.End()
+	ctx, span := wph.OTELTracer.Start(ctx, "CHAMADA EXTERNA: entrance-cep-api")
+	defer span.End()
+
+	temperature, err := wph.checkWeatherLocalUseCase.ExecuteLocal(ctx, &wp)
 	if err != nil {
 		log.Println("temperature error", err.Error())
 		if err.Error() == "invalid zipcode" {

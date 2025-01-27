@@ -76,6 +76,11 @@ services:
         condition: service_healthy
       zipkin:
         condition: service_healthy
+#    healthcheck:
+#      test: ["CMD", "wget", "--spider", "--no-verbose", "--tries=1", "--timeout=5", "http://localhost:13133/health"]
+#      interval: 10s
+#      timeout: 10s
+#      retries: 5
 
   api1:
     build:
@@ -85,6 +90,8 @@ services:
         APP_NAME: servico-a
     depends_on:
       - otel-collector
+#      otel-collector:
+#        condition: service_healthy
     ports:
       - "8080:8080"
     networks:

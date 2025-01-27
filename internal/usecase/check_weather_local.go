@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/entity"
@@ -17,12 +18,12 @@ func NewCheckWeatherLocalUseCase(localIntegration entity.WeatherApiLocalIntegrat
 	}
 }
 
-func (c *CheckWeatherLocalUseCase) ExecuteLocal(cep *dto.WeatherPostDTO) (*dto.TemperatureDTO, error) {
+func (c *CheckWeatherLocalUseCase) ExecuteLocal(ctx context.Context, cep *dto.WeatherPostDTO) (*dto.TemperatureDTO, error) {
 	if !cepIsValid(cep.CEP) {
 		return nil, errors.New("invalid zipcode")
 	}
 	chLocal := make(chan types.Either[dto.TemperatureDTO])
-	go c.LocalApiIntegration.GetCep(cep, chLocal)
+	go c.LocalApiIntegration.GetCep(ctx, cep, chLocal)
 	resChLocal := <-chLocal
 	if resChLocal.Left != nil {
 		return nil, resChLocal.Left

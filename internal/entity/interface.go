@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"context"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/infra/types"
 )
@@ -14,7 +15,7 @@ type WeatherapiIntegrationInterface interface {
 }
 
 type WeatherApiLocalIntegrationInterface interface {
-	GetCep(cep *dto.WeatherPostDTO, resultCh chan<- types.Either[dto.TemperatureDTO])
+	GetCep(ctx context.Context, cep *dto.WeatherPostDTO, resultCh chan<- types.Either[dto.TemperatureDTO])
 }
 
 type CheckWeatherUseCaseInterface interface {
@@ -22,5 +23,5 @@ type CheckWeatherUseCaseInterface interface {
 }
 
 type CheckWeatherLocalUseCaseInterface interface {
-	ExecuteLocal(cep *dto.WeatherPostDTO) (*dto.TemperatureDTO, error)
+	ExecuteLocal(ctx context.Context, cep *dto.WeatherPostDTO) (*dto.TemperatureDTO, error)
 }
