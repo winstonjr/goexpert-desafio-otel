@@ -30,8 +30,7 @@ func main() {
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
-	// TODO: colocar estas informações em variáveis de ambiente
-	shutdown, err := initProvider("entrance-cep-api", "otel-collector:4317")
+	shutdown, err := initProvider("entrance-cep-api", config.OtelCollector)
 	if err != nil {
 		log.Fatal(err)
 	}

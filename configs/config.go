@@ -10,6 +10,7 @@ import (
 type conf struct {
 	WeatherApiKey  string `mapstructure:"WEATHER_API_KEY"`
 	InternalApiURI string `mapstructure:"INTERNAL_API_URI"`
+	OtelCollector  string `mapstructure:"OTEL_COLLECTOR"`
 }
 
 func LoadConfig(path string) (*conf, error) {
