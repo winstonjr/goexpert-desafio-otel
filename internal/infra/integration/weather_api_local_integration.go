@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/dto"
 	"github.com/winstonjr/goexpert-desafio-otel/internal/infra/types"
 	"go.opentelemetry.io/otel"
@@ -59,6 +60,11 @@ func (w *WeatherAPILocalIntegration) GetCep(ctx context.Context, cep *dto.Weathe
 	var data dto.TemperatureDTO
 	err = json.Unmarshal(res, &data)
 	if err != nil {
+		errAttempt := string(res)
+		if errAttempt != "" {
+			resultCh <- types.Either[dto.TemperatureDTO]{Left: errors.New(errAttempt)}
+			return
+		}
 		resultCh <- types.Either[dto.TemperatureDTO]{Left: err}
 		return
 	}

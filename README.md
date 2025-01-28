@@ -17,6 +17,8 @@ OTEL_COLLECTOR=otel-collector:4317
 6. Preencher a chave `WEATHER_API_KEY=` com o valor da chave criada no passo 2
 7. Rodar `docker compose up` na pasta com o arquivo `docker-compose.yaml`
 
+PS: Alternativamente também é possível copiar o arquivo `.env_exemplo` para as pastas `cmd/servico-a/` e `cmd/servico-b/`. Não esquecendo de preencher a variável `WEATHER_API_KEY=` com o valor da chave criada no passo 2. 
+
 ### Validando o funcionamento do Zipkin
 1. Rodar os testes no arquivo `api/check_weather.http`
 2. Entrar no Zipkin através do link `http://localhost:9411/zipkin/`

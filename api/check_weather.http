@@ -4,7 +4,7 @@ Host: localhost:8080
 Content-Type: application/json
 
 {
-  "cep":"01311100"
+  "cep":"00000001"
 }
 
 ### Este teste deve gerar 1 trace (trace deste serviço apenas)

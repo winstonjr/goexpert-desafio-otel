@@ -49,7 +49,7 @@ func main() {
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/", localApiPostHandler.Handle)
 
-	fmt.Println("Service B - Listening on port :8080")
+	fmt.Println("Service A - Listening on port :8080")
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
