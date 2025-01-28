@@ -1,43 +1,17 @@
-POST http://localhost:8081/
-Host: localhost:8081
-Content-Type: application/json
-
-{
-"cep":"01311100"
-}
-###
-
-GET http://localhost:8081/
-Host: localhost:8081
-Content-Type: application/json
-
-{
-  "cep":"1311100"
-}
-###
-
-GET http://localhost:8081/
-Host: localhost:8081
-Content-Type: application/json
-
-{
-  "cep": "00000000"
-}
-###
-
-GET http://localhost:8081/
-Host: localhost:8081
-Content-Type: application/json
-
-{
-  "cep": "00000000"
-}
-
-###
+### Este teste deve gerar 2 traces (trace inicial e trace do serviço chamado)
 POST http://localhost:8080/
 Host: localhost:8080
 Content-Type: application/json
 
 {
   "cep":"01311100"
+}
+
+### Este teste deve gerar 1 trace (trace deste serviço apenas)
+POST http://localhost:8081/
+Host: localhost:8081
+Content-Type: application/json
+
+{
+"cep":"01311100"
 }
